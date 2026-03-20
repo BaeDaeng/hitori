@@ -1,0 +1,320 @@
+/* =========================================
+   1. 기본 설정 (비율 유지를 위한 필수)
+========================================= */
+* {
+  box-sizing: border-box; /* 패딩이 커져도 창 밖으로 안 삐져나가게 함 */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  /* 브라우저 창 전체 높이를 100%로 채움 */
+  min-height: 100vh; 
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #007bff;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+input, textarea {
+  font-family: inherit;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus {
+  border-color: #007bff;
+}
+
+/* =========================================
+   2. 네비게이션 바 (유연하게 줄어듦)
+========================================= */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; /* 창이 좁아지면 자동으로 줄 바꿈 */
+  padding: 15px 5%; /* 좌우 여백을 %로 줘서 화면 비율에 맞춤 */
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logout-btn {
+  padding: 6px 14px;
+  background-color: #f1f3f5;
+  color: #495057;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background-color: #e9ecef;
+}
+
+/* =========================================
+   3. 메인 컨테이너 (화면 중앙 정렬 및 꽉 차게)
+========================================= */
+.container {
+  width: 90%; /* 모바일에서는 가로 90% 차지 */
+  max-width: 1200px; /* PC에서는 너무 퍼지지 않게 최대 너비 제한 */
+  margin: 30px auto; /* 가운데 정렬 */
+  flex: 1; /* 남은 높이를 모두 차지하게 해서 푸터가 있다면 밑으로 밀어냄 */
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 15px;
+}
+
+/* =========================================
+   4. 게시글 목록 & 상세 디자인
+========================================= */
+.post-list {
+  display: grid; /* 반응형 격자 레이아웃 사용 */
+  grid-template-columns: 1fr; /* 기본은 1줄 */
+  gap: 15px;
+}
+
+.post-item {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.post-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+}
+
+.post-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: block;
+}
+
+.post-detail {
+  background-color: #fff;
+  padding: 5%;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.post-body {
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 30px;
+  color: #495057;
+  white-space: pre-wrap; /* 줄바꿈 인식 */
+}
+
+.post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+/* 버튼 공통 스타일 */
+.like-btn { background-color: #e3f2fd; color: #007bff; padding: 10px 20px; font-weight: 600; }
+.like-btn:hover { background-color: #bbdefb; }
+.edit-btn { background-color: #f1f3f5; color: #495057; padding: 10px 20px; }
+.edit-btn:hover { background-color: #e9ecef; }
+.delete-btn { background-color: #fff1f0; color: #f5222d; padding: 10px 20px; }
+.delete-btn:hover { background-color: #ffe5e5; }
+
+/* =========================================
+   5. 폼 (로그인, 글쓰기, 댓글 등)
+========================================= */
+.form-box {
+  background-color: #fff;
+  padding: 40px 5%;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 450px; /* 로그인 창 같은 경우 너무 넓어지지 않게 고정 */
+  margin: 50px auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.form-submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.withdraw-btn {
+  background-color: #fff;
+  color: #f5222d;
+  border: 1px solid #ffa39e;
+  width: 100%;
+  padding: 14px;
+  margin-top: 30px;
+  font-weight: 600;
+}
+
+.withdraw-btn:hover {
+  background-color: #fff1f0;
+}
+
+/* 댓글 영역 */
+.comment-section {
+  margin-top: 40px;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.comment-input {
+  flex: 1;
+}
+
+.comment-submit-btn {
+  padding: 0 25px;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  white-space: nowrap; /* 버튼 글자 줄바꿈 방지 */
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.comment-item {
+  background-color: #f8f9fa;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.comment-author {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.comment-body {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.comment-like-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+/* =========================================
+   6. 반응형 (모바일 & 태블릿 맞춤 설정)
+========================================= */
+
+/* 태블릿 크기 (768px 이하) */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 5%;
+  }
+  .container {
+    width: 95%; /* 화면을 조금 더 꽉 차게 씀 */
+    margin: 20px auto;
+  }
+}
+
+/* 스마트폰 크기 (480px 이하) */
+@media (max-width: 480px) {
+  .navbar {
+    flex-direction: column; /* 네비게이션을 세로로 배치 */
+    gap: 15px;
+    padding: 20px;
+  }
+  
+  .nav-links, .nav-user {
+    width: 100%;
+    justify-content: center; /* 가운데 정렬 */
+    flex-wrap: wrap;
+  }
+  
+  .post-detail {
+    padding: 20px; /* 폰에서는 패딩을 줄여서 글자가 더 많이 보이게 함 */
+  }
+
+  .comment-form {
+    flex-direction: column; /* 댓글 입력창과 버튼을 위아래로 분리 */
+  }
+
+  .comment-submit-btn {
+    padding: 12px;
+    width: 100%; /* 버튼을 폰 화면 꽉 차게 */
+  }
+}
