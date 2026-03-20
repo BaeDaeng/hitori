@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import api from '../api';
 
 export default function PostEdit({ user }) {
   const { id } = useParams();
@@ -9,34 +9,28 @@ export default function PostEdit({ user }) {
   const [body, setBody] = useState('');
 
   useEffect(() => {
-    axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`)
-      .then((res) => {
-        setTitle(res.data.title);
-        setBody(res.data.body);
-      })
-      .catch((err) => console.error(err));
+    api.get(`/posts/${id}`).then((res) => {
+      setTitle(res.data.title);
+      setBody(res.data.body);
+    });
   }, [id]);
 
   const handleEdit = (e) => {
     e.preventDefault();
-    axios.put(`https://jsonplaceholder.typicode.com/posts/${id}`, {
-      id, title, body, userId: user.id
-    })
-    .then((res) => {
-      console.log('수정 완료 데이터:', res.data);
-      alert('수정이 완료되었습니다!');
-      navigate(`/post/${id}`);
-    })
-    .catch((err) => console.error(err));
+    api.put(`/posts/${id}`, { id, title, body, userId: user.id })
+      .then(() => { alert('수정되었습니다.'); navigate(`/post/${id}`); });
   };
 
   return (
-    <div className="post-detail">
-      <h2>글 수정하기</h2>
-      <form onSubmit={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} required rows="10" />
-        <button type="submit" className="form-submit-btn">수정 완료</button>
+    <div className="page-wrapper">
+      <h2>내 글 수정하기</h2>
+      <form onSubmit={handleEdit}>
+        <input type="text" value={title} readOnly title="제목은 수정 불가능" style={{ backgroundColor: '#f0f0f0', color: '#888' }} />
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} required rows="15" />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button type="button" onClick={() => navigate(-1)} className="action-btn" style={{ flex: 1 }}>취소</button>
+          <button type="submit" className="primary-btn" style={{ flex: 2 }}>수정 완료</button>
+        </div>
       </form>
     </div>
   );

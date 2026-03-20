@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login({ setUser }) {
   const [id, setId] = useState('');
@@ -8,23 +8,21 @@ export default function Login({ setUser }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    setUser({ id: id, name: id }); 
-    alert(`${id}님 로그인 성공!`);
+    setUser({ id: id, name: id, email: `${id}@test.com`, phone: '010-1234-5678' }); 
     navigate('/');
   };
 
   return (
-    <div className="form-box">
+    <div className="page-wrapper">
       <h2>로그인</h2>
       <form onSubmit={handleLogin}>
-        <div className="form-group">
-          <input type="text" placeholder="아이디" value={id} onChange={(e) => setId(e.target.value)} required />
-        </div>
-        <div className="form-group">
-          <input type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
-        <button type="submit" className="form-submit-btn">로그인</button>
+        <input type="text" placeholder="아이디" value={id} onChange={(e) => setId(e.target.value)} required />
+        <input type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="submit" className="primary-btn" style={{ marginTop: '10px' }}>로그인</button>
       </form>
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <Link to="/signup" style={{ color: '#007bff', fontWeight: 'bold' }}>회원가입 하러가기</Link>
+      </div>
     </div>
   );
 }

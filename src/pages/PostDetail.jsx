@@ -1,99 +1,81 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 
 export default function PostDetail({ user }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
-  const [postLikes, setPostLikes] = useState(0);
+  const [likes, setLikes] = useState(0);
   const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
-    axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`)
-      .then((res) => setPost(res.data))
-      .catch((err) => console.error(err));
-      
-    axios.get(`https://jsonplaceholder.typicode.com/posts/${id}/comments`)
-      .then((res) => setComments(res.data))
-      .catch((err) => console.error(err));
+    api.get(`/posts/${id}`).then((res) => setPost(res.data));
+    api.get(`/posts/${id}/comments`).then((res) => setComments(res.data));
   }, [id]);
 
-  const handleDeletePost = () => {
-    if (window.confirm('게시글을 삭제하시겠습니까?')) {
-      axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`)
-        .then(() => {
-          alert('삭제 완료!');
-          navigate('/');
-        })
-        .catch((err) => console.error(err));
+  const handleDelete = () => {
+    if (window.confirm('삭제하시겠습니까?')) {
+      api.delete(`/posts/${id}`).then(() => navigate('/'));
     }
   };
 
-  const handleAddComment = (e) => {
+  const handleComment = (e) => {
     e.preventDefault();
-    if (!user) return alert('로그인이 필요합니다!');
-    
-    const commentData = {
-      postId: id,
-      name: user.name,
-      body: newComment,
-    };
-
-    setComments([...comments, { ...commentData, id: Date.now() }]);
+    if (!user) return alert('로그인이 필요합니다.');
+    setComments([...comments, { id: Date.now(), name: user.name, body: newComment }]);
     setNewComment('');
   };
 
-  if (!post) return <div style={{ textAlign: 'center', marginTop: '50px' }}>로딩 중...</div>;
+  if (!post) return <div>로딩 중...</div>;
 
   return (
-    <div className="post-detail">
-      <div style={{ borderBottom: '1px solid #eee', marginBottom: '20px' }}>
-        <h2 style={{ border: 'none', marginBottom: '10px' }}>{post.title}</h2>
-        <p className="post-body">{post.body}</p>
-        
-        <div className="post-actions" style={{ paddingBottom: '20px' }}>
-          <button onClick={() => setPostLikes(postLikes + 1)} className="like-btn">
-            👍 좋아요 {postLikes}
-          </button>
-          
-          {user && (
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
-              <Link to={`/edit/${id}`} className="edit-btn">수정</Link>
-              <button onClick={handleDeletePost} className="delete-btn">삭제</button>
-            </div>
-          )}
-        </div>
+    <div className="page-wrapper">
+      {/* 헤더 (제목 및 버튼) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+        <h2 style={{ border: 'none', margin: 0, padding: 0 }}>{post.title}</h2>
+        {user && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Link to={`/edit/${id}`} className="action-btn">수정</Link>
+            <button onClick={handleDelete} className="danger-btn">삭제</button>
+          </div>
+        )}
       </div>
 
-      <div className="comment-section">
-        <h3>댓글 ({comments.length})</h3>
-        
-        <form onSubmit={handleAddComment} className="comment-form">
+      <div style={{ color: '#666', marginBottom: '20px' }}>작성자: User{post.userId}</div>
+      
+      {/* 내용 영역 */}
+      <div className="post-content-box">{post.body}</div>
+      
+      {/* 좋아요 */}
+      <div style={{ marginBottom: '40px' }}>
+        <button onClick={() => setLikes(likes + 1)} className="like-btn">👍 좋아요 {likes}</button>
+      </div>
+
+      {/* 댓글 영역 */}
+      <div>
+        <h3 style={{ marginBottom: '15px' }}>댓글</h3>
+        <form onSubmit={handleComment} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           <input 
             type="text" 
             value={newComment} 
             onChange={(e) => setNewComment(e.target.value)} 
-            placeholder={user ? "댓글을 남겨보세요" : "로그인 후 댓글 작성 가능"} 
+            placeholder={user ? "댓글을 입력하세요" : "로그인 후 댓글 작성 가능"} 
             disabled={!user}
-            className="comment-input"
+            style={{ margin: 0 }}
           />
-          <button type="submit" disabled={!user} className="comment-submit-btn">등록</button>
+          <button type="submit" disabled={!user} className="primary-btn" style={{ width: '100px', padding: '15px 0' }}>전송</button>
         </form>
 
-        <ul className="comment-list">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {comments.map((comment) => (
-            <li key={comment.id} className="comment-item">
-              <div className="comment-author">{comment.name}</div>
-              <p className="comment-body">{comment.body}</p>
-              <button onClick={() => alert('댓글 좋아요 구현 연습용 버튼입니다!')} className="comment-like-btn">
-                👍 공감
-              </button>
-            </li>
+            <div key={comment.id} style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px' }}>
+              <strong style={{ display: 'block', marginBottom: '5px' }}>{comment.name}</strong>
+              <div>{comment.body}</div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

@@ -14,31 +14,24 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {/* 네비게이션 바 클래스 적용 */}
       <nav className="navbar">
-        <Link to="/" className="nav-logo">게시판</Link>
-        <div className="nav-links">
-          <Link to="/">홈</Link>
-          {user && <Link to="/write">새 글 쓰기</Link>}
-          {user && <Link to="/mypage">마이페이지</Link>}
-        </div>
-        
+        <Link to="/" className="nav-logo">Home</Link>
         <div className="nav-user">
           {user ? (
             <>
-              <span>{user.name}님</span>
-              <button onClick={() => setUser(null)} className="logout-btn">로그아웃</button>
+              <Link to="/write" className="nav-btn">새 글 쓰기</Link>
+              <Link to="/mypage" className="nav-btn">마이페이지</Link>
+              <button onClick={() => setUser(null)} className="logout-btn">Logout</button>
             </>
           ) : (
             <>
-              <Link to="/login">로그인</Link>
-              <Link to="/signup">회원가입</Link>
+              <Link to="/login" className="nav-btn">Login</Link>
+              <Link to="/signup" className="nav-btn">Register</Link>
             </>
           )}
         </div>
       </nav>
 
-      {/* 메인 컨테이너 클래스 적용 */}
       <div className="container">
         <Routes>
           <Route path="/" element={<PostList />} />
