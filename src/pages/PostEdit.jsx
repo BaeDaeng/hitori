@@ -22,8 +22,8 @@ export default function PostEdit({ user }) {
   };
 
   return (
-    <div className="page-wrapper" style={{ justifyContent: 'center', alignItems: 'center', padding: '20px 0' }}>
-      <div style={{ width: '100%', maxWidth: '800px', backgroundColor: '#fff', padding: '40px 5%', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+    <div className="center-wrapper">
+      <div className="center-box" style={{ maxWidth: '800px' }}>
         <h2 style={{ borderBottom: '2px solid #ddd', paddingBottom: '15px', marginBottom: '20px' }}>내 글 수정하기</h2>
         <form onSubmit={handleEdit}>
           <input type="text" value={title} readOnly title="제목은 수정 불가능" style={{ backgroundColor: '#f0f0f0', color: '#888' }} />

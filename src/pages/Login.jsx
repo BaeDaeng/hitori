@@ -13,9 +13,8 @@ export default function Login({ setUser }) {
   };
 
   return (
-    <div className="page-wrapper">
-      {/* [경고 해결] 폼을 감싸는 박스에 'margin: 0 auto'를 추가하여 가로 중앙 정렬했습니다. */}
-      <div style={{ width: '100%', maxWidth: '450px', backgroundColor: '#fff', padding: '40px 5%', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', margin: '0 auto' }}>
+    <div className="center-wrapper" style={{ marginTop: '-70px' }}>
+      <div className="center-box" style={{ maxWidth: '450px' }}>
         <h2 style={{ textAlign: 'center', marginBottom: '30px', border: 'none' }}>로그인</h2>
         <form onSubmit={handleLogin}>
           <input type="text" placeholder="아이디" value={id} onChange={(e) => setId(e.target.value)} required />
@@ -23,7 +22,7 @@ export default function Login({ setUser }) {
           <button type="submit" className="primary-btn" style={{ marginTop: '10px' }}>로그인</button>
         </form>
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <Link to="/signup" style={{ color: '#007bff', fontWeight: 'bold' }}>회원가입 하러가기</Link>
+          <Link to="/signup" style={{ color: '#0d6efd', fontWeight: 'bold' }}>회원가입 하러가기</Link>
         </div>
       </div>
     </div>

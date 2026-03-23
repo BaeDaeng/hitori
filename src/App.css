@@ -370,3 +370,23 @@ select:focus {
     text-align: left !important;
   }
 }
+
+/* =========================================
+   6. 중앙 정렬 전용 강제 클래스 (추가)
+========================================= */
+.center-wrapper {
+  display: flex !important;
+  justify-content: center !important; /* 가로 중앙 완벽 고정 */
+  align-items: center !important;     /* 세로 중앙 완벽 고정 */
+  width: 100% !important;
+  min-height: calc(100vh - 150px) !important;
+}
+
+.center-box {
+  width: 100% !important;
+  background-color: #fff !important;
+  padding: 40px 5% !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+  margin: 0 auto !important;
+}
