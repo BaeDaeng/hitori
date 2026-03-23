@@ -22,11 +22,11 @@ export default function PostEdit({ user }) {
   };
 
   return (
-    <div className="center-wrapper">
-      <div className="center-box" style={{ maxWidth: '800px' }}>
-        <h2 style={{ borderBottom: '2px solid #ddd', paddingBottom: '15px', marginBottom: '20px' }}>내 글 수정하기</h2>
+    <div style={{ display: 'block', width: '100%', padding: '50px 15px' }}>
+      <div style={{ display: 'block', margin: '0 auto', width: '100%', maxWidth: '800px', backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+        <h2 style={{ borderBottom: '2px solid #dee2e6', paddingBottom: '15px', marginBottom: '20px' }}>내 글 수정하기</h2>
         <form onSubmit={handleEdit}>
-          <input type="text" value={title} readOnly title="제목은 수정 불가능" style={{ backgroundColor: '#f0f0f0', color: '#888' }} />
+          <input type="text" value={title} readOnly title="제목은 수정 불가능" style={{ backgroundColor: '#e9ecef', color: '#6c757d' }} />
           <textarea value={body} onChange={(e) => setBody(e.target.value)} required rows="15" />
           <div style={{ display: 'flex', gap: '10px' }}>
             <button type="button" onClick={() => navigate(-1)} className="action-btn" style={{ flex: 1 }}>취소</button>

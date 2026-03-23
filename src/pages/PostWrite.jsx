@@ -15,9 +15,9 @@ export default function PostWrite({ user }) {
   };
 
   return (
-    <div className="center-wrapper">
-      <div className="center-box" style={{ maxWidth: '800px' }}>
-        <h2 style={{ borderBottom: '2px solid #ddd', paddingBottom: '15px', marginBottom: '20px' }}>새 글 작성</h2>
+    <div style={{ display: 'block', width: '100%', padding: '50px 15px' }}>
+      <div style={{ display: 'block', margin: '0 auto', width: '100%', maxWidth: '800px', backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+        <h2 style={{ borderBottom: '2px solid #dee2e6', paddingBottom: '15px', marginBottom: '20px' }}>새 글 작성</h2>
         <form onSubmit={handleSubmit}>
           <input type="text" placeholder="제목을 입력하세요" value={title} onChange={(e) => setTitle(e.target.value)} required />
           <textarea placeholder="내용을 입력하세요" value={body} onChange={(e) => setBody(e.target.value)} required rows="15" />

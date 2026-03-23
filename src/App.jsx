@@ -7,8 +7,8 @@ import PostEdit from './pages/PostEdit';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import MyPage from './pages/MyPage';
-import SearchResults from './pages/SearchResults'; // 신규
-import EditProfile from './pages/EditProfile'; // 신규
+import SearchResults from './pages/SearchResults';
+import EditProfile from './pages/EditProfile';
 import './App.css';
 
 export default function App() {
@@ -34,7 +34,8 @@ export default function App() {
         </div>
       </nav>
 
-      <div className="container">
+      {/* 🚨 핵심 수정: Bootstrap과 충돌하는 container 이름을 버리고 고유 이름 사용 */}
+      <div className="app-main-layout">
         <Routes>
           <Route path="/" element={<PostList />} />
           <Route path="/search" element={<SearchResults />} />
