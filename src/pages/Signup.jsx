@@ -27,9 +27,11 @@ export default function Signup() {
   };
 
   return (
-    <div className="page-wrapper" style={{ justifyContent: 'center', alignItems: 'center', padding: '40px 0' }}>
-      <div style={{ width: '100%', maxWidth: '600px', backgroundColor: '#fff', padding: '40px 5%', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-        <h2 style={{ textAlign: 'center', border: 'none', padding: 0, marginBottom: '30px' }}>회원가입</h2>
+    // 중앙 정렬 속성 추가
+    <div className="page-wrapper" style={{ alignItems: 'center' }}>
+      {/* 폼을 감싸는 하얀색 중앙 박스 (최대 너비 600px) */}
+      <div style={{ width: '100%', maxWidth: '600px', backgroundColor: '#fff', padding: '40px 5%', borderRadius: '8px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '30px', border: 'none' }}>회원가입</h2>
         <form onSubmit={handleSignup} style={{ width: '100%' }}>
           
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>

@@ -1,10 +1,10 @@
 /* =========================================
-   1. 기본 설정 (절대 잘리지 않는 반응형)
+   1. 기본 설정 (절대 잘리지 않는 반응형 유지 + Bootstrap 디자인)
 ========================================= */
 * {
   box-sizing: border-box;
   word-break: break-word;
-  /* 텍스트가 창을 뚫고 나가지 않게 무조건 줄바꿈 */
+  /* 텍스트가 창을 뚫고 나가지 않게 무조건 줄바꿈 (유지) */
 }
 
 html,
@@ -14,85 +14,109 @@ body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  /* 가로로 창이 잘리거나 스크롤 생기는 현상 완벽 차단 */
-  font-family: 'Noto Sans KR', sans-serif;
-  background-color: #f5f5f5;
-  color: #111;
-  /* 글씨가 잘 보이도록 진한 색으로 변경 */
   min-height: 100vh;
+  /* 가로로 창이 잘리거나 스크롤 생기는 현상 완벽 차단 (유지) */
+  
+  /* styles.css 디자인 적용 (폰트, 배경색, 글자색) */
+  font-family: 'Noto Sans KR', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #f8f9fa; /* Bootstrap Light Background */
+  color: #212529; /* Bootstrap Body Color */
+  -webkit-text-size-adjust: 100%;
 }
 
 a {
   text-decoration: none;
-  color: inherit;
+  color: #0d6efd; /* Bootstrap Link Color */
+  transition: color 0.15s ease-in-out;
+}
+
+a:hover {
+  color: #0a58ca;
 }
 
 button {
   cursor: pointer;
-  border: none;
-  transition: opacity 0.2s;
+  border: 1px solid transparent;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   font-family: inherit;
 }
 
-button:hover {
-  opacity: 0.8;
-}
-
 button:disabled {
-  background-color: #ccc !important;
+  opacity: 0.65 !important;
   cursor: not-allowed;
 }
 
 /* =========================================
-   2. 폼 & 입력창 (글씨 명확하게)
+   2. 폼 & 입력창 (Bootstrap .form-control 스타일 적용)
 ========================================= */
 input,
 textarea,
 select {
+  /* 기능 유지 */
   width: 100%;
-  padding: 15px;
-  background-color: #fff;
-  border: 1px solid #aaa;
-  /* 테두리를 조금 더 진하게 */
-  color: #000;
-  /* 입력하는 글씨가 무조건 검은색으로 보이게 확정! */
-  border-radius: 4px;
-  font-size: 15px;
-  outline: none;
   margin-bottom: 15px;
+  
+  /* styles.css 디자인 적용 */
+  display: block;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  appearance: none;
+  outline: none;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #888;
+  color: #6c757d; /* Bootstrap text-muted */
+  opacity: 1;
 }
 
 input:focus,
-textarea:focus {
-  border-color: #424242;
+textarea:focus,
+select:focus {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe; /* Bootstrap Focus Border */
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Bootstrap Focus Ring */
 }
 
 /* =========================================
-   3. 고정 헤더 & 컨테이너
+   3. 고정 헤더 & 컨테이너 (Bootstrap Navbar Dark 스타일)
 ========================================= */
 .navbar {
+  /* 기능 유지 */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #424242;
-  padding: 0 5%;
-  color: white;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 70px;
-  z-index: 1000;
+  padding: 0 5%;
+  z-index: 1039; /* styles.css의 fixed nav z-index */
+  
+  /* styles.css 디자인 적용 */
+  background-color: #212529; /* bg-dark */
+  color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .nav-logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff; /* navbar-brand-color */
+  white-space: nowrap;
 }
 
 .nav-user {
@@ -101,109 +125,178 @@ textarea:focus {
   align-items: center;
 }
 
+/* 네비게이션 버튼 (Bootstrap .btn-light 스타일) */
 .nav-btn,
 .logout-btn {
-  background-color: white;
-  color: #333;
-  padding: 8px 15px;
-  font-weight: bold;
-  border-radius: 4px;
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
   white-space: nowrap;
+  vertical-align: middle;
+  border-radius: 0.375rem;
+  color: #000;
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+}
+
+.nav-btn:hover,
+.logout-btn:hover {
+  background-color: #d3d4d5;
+  border-color: #c6c7c8;
+  color: #000;
 }
 
 .container {
+  /* 기능 유지 */
   width: 100%;
   padding: 30px 5%;
-  /* 양옆 여백을 5%로 유동적으로 설정 */
   margin-top: 70px;
-  /* 헤더 높이만큼 띄움 */
   min-height: calc(100vh - 70px);
   display: flex;
   flex-direction: column;
 }
 
 /* =========================================
-   4. 게시물 & 버튼 디자인
+   4. 게시물 & 버튼 디자인 (Bootstrap Card & Button 적용)
 ========================================= */
 .post-item {
-  background-color: #fff;
-  padding: 20px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  /* 기능 유지 */
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-bottom: 15px;
+  
+  /* styles.css .card 디자인 적용 */
+  background-color: #fff;
+  background-clip: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.175);
+  border-radius: 0.375rem;
+  padding: 1.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* shadow-sm */
 }
 
 .post-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 10px;
+  /* 디자인 적용 (.card-title) */
   display: block;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #212529;
+  margin-bottom: 0.5rem;
 }
 
-/* 미리보기 글씨가 2줄 이상 넘어가면 예쁘게 ... 처리 (창이 작아도 안 깨짐) */
 .post-preview {
-  font-size: 0.95rem;
-  color: #555;
+  /* 기능 유지 (텍스트 줄임 효과) */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  
+  /* 디자인 적용 */
+  font-size: 1rem;
+  color: #6c757d; /* text-muted */
+  margin-bottom: 1rem;
 }
 
 .post-item-bottom {
   align-self: flex-end;
   text-align: right;
-  font-size: 0.9rem;
-  color: #888;
-  margin-top: 15px;
+  font-size: 0.875rem; /* Bootstrap small */
+  color: #6c757d;
+  margin-top: auto;
 }
 
-.primary-btn {
-  background-color: #424242;
-  color: white;
-  padding: 15px;
-  font-size: 16px;
-  font-weight: bold;
-  width: 100%;
-  border-radius: 4px;
-}
-
-.action-btn {
-  background-color: #e0e0e0;
-  color: #333;
-  padding: 10px 20px;
-  font-weight: bold;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.danger-btn {
-  background-color: #f5222d;
-  color: white;
-  padding: 10px 20px;
-  font-weight: bold;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
+/* --- 버튼 디자인 (.btn 파생) --- */
+.primary-btn,
+.action-btn,
+.danger-btn,
 .like-btn {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  color: #333;
-  padding: 8px 15px;
-  font-weight: bold;
-  border-radius: 20px;
-  white-space: nowrap;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  user-select: none;
+  line-height: 1.5;
 }
 
+/* 기본 버튼 기능 유지 + Bootstrap .btn-primary */
+.primary-btn {
+  width: 100%;
+  padding: 15px; /* 원본 크기 유지 */
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+.primary-btn:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+.primary-btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(49, 132, 253, 0.5);
+}
+
+/* 서브 버튼 기능 유지 + Bootstrap .btn-secondary */
+.action-btn {
+  padding: 0.375rem 0.75rem;
+  font-weight: 400;
+  border-radius: 0.375rem;
+  white-space: nowrap;
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.action-btn:hover {
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+.action-btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(130, 138, 145, 0.5);
+}
+
+/* 위험 버튼 기능 유지 + Bootstrap .btn-danger */
+.danger-btn {
+  padding: 0.375rem 0.75rem;
+  font-weight: 400;
+  border-radius: 0.375rem;
+  white-space: nowrap;
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+.danger-btn:hover {
+  background-color: #bb2d3b;
+  border-color: #b02a37;
+}
+.danger-btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(225, 83, 97, 0.5);
+}
+
+/* 좋아요 버튼 기능 유지 + Bootstrap .btn-outline-primary 느낌 */
+.like-btn {
+  padding: 0.375rem 0.75rem;
+  font-weight: 400;
+  border-radius: 50rem; /* pill 형태 유지 */
+  white-space: nowrap;
+  color: #6c757d;
+  background-color: transparent;
+  border: 1px solid #6c757d;
+}
+.like-btn:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
 .like-btn.active {
-  background-color: #e3f2fd;
-  border-color: #2196f3;
-  color: #2196f3;
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }
 
 .page-wrapper {
@@ -221,7 +314,7 @@ textarea:focus {
 }
 
 /* =========================================
-   5. 모바일/작은 창 완벽 대응 (미디어 쿼리)
+   5. 모바일/작은 창 완벽 대응 (원본 미디어 쿼리 100% 보존)
 ========================================= */
 @media (max-width: 600px) {
   .navbar {
@@ -229,13 +322,13 @@ textarea:focus {
   }
 
   .nav-logo {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .nav-btn,
   .logout-btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem; /* Bootstrap .btn-sm 패딩으로 조절 */
+    font-size: 0.875rem;
   }
 
   /* 마이페이지 정보 등 가로로 된 요소들을 세로로 정렬 */
@@ -247,8 +340,6 @@ textarea:focus {
   .responsive-img-container {
     margin: 0 auto;
   }
-
-  /* 모바일에서 프사 가운데 정렬 */
 
   /* 입력창과 버튼이 옆으로 붙어있는 걸 위아래로 분리해서 잘림 방지 */
   .input-group {
@@ -274,7 +365,7 @@ textarea:focus {
     gap: 15px;
   }
 
-  .detail-header>div {
+  .detail-header > div {
     align-self: flex-start !important;
     text-align: left !important;
   }
