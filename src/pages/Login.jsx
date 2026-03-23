@@ -13,7 +13,6 @@ export default function Login({ setUser }) {
   };
 
   return (
-    /* 🚨 100% 무조건 가운데로 보내는 절대 스타일 (margin: '0 auto' 직접 주입) */
     <div style={{ display: 'block', width: '100%', padding: '50px 15px' }}>
       <div style={{ display: 'block', margin: '0 auto', width: '100%', maxWidth: '450px', backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
         <h2 style={{ textAlign: 'center', marginBottom: '30px', border: 'none' }}>로그인</h2>
