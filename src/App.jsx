@@ -9,6 +9,7 @@ import Signup from './pages/Signup';
 import MyPage from './pages/MyPage';
 import SearchResults from './pages/SearchResults';
 import EditProfile from './pages/EditProfile';
+import UserProfile from './pages/UserProfile'; // 🌟 새 프로필 페이지 추가
 import './App.css';
 
 export default function App() {
@@ -34,7 +35,6 @@ export default function App() {
         </div>
       </nav>
 
-      {/* 🚨 핵심 수정: Bootstrap과 충돌하는 container 이름을 버리고 고유 이름 사용 */}
       <div className="app-main-layout">
         <Routes>
           <Route path="/" element={<PostList />} />
@@ -46,6 +46,9 @@ export default function App() {
           <Route path="/edit-profile" element={user ? <EditProfile user={user} setUser={setUser} /> : <Navigate to="/login" />} />
           <Route path="/write" element={user ? <PostWrite user={user} /> : <Navigate to="/login" />} />
           <Route path="/edit/:id" element={user ? <PostEdit user={user} /> : <Navigate to="/login" />} />
+          
+          {/* 🌟 다른 사람 프로필 보는 주소 추가 */}
+          <Route path="/user/:id" element={<UserProfile />} />
         </Routes>
       </div>
     </BrowserRouter>

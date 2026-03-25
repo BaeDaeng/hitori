@@ -33,7 +33,10 @@ export default function PostList() {
                 <div className="post-preview">{post.body}</div>
               </div>
               <div className="post-item-bottom">
-                <div>작성자: User{post.userId}</div>
+                {/* 🌟 작성자 이름 클릭 시 프로필로 이동 */}
+                <div style={{ marginBottom: '5px' }}>
+                  작성자: <Link to={`/user/${post.userId}`} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>User{post.userId}</Link>
+                </div>
                 <div>조회수: {views} | 좋아요: {Math.floor(0)} | 댓글: {Math.floor(0)}</div>
               </div>
             </div>
