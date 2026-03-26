@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api';
+import UserModal from '../components/UserModal'; // 🌟 팝업 컴포넌트 불러오기
 
 export default function PostDetail({ user }) {
   const { id } = useParams();
@@ -15,6 +16,8 @@ export default function PostDetail({ user }) {
   const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [popupUserId, setPopupUserId] = useState(null); // 🌟 팝업에 띄울 유저 ID 상태
+
   const mockTime = "2026-03-23 10:00";
 
   useEffect(() => {
@@ -46,7 +49,7 @@ export default function PostDetail({ user }) {
     setComments([...comments, { 
       id: Date.now(), 
       name: user.nickname, 
-      userId: user.id || 1, // 🌟 방금 단 댓글도 유저 아이디 저장
+      userId: user.id || 1, 
       body: newComment, 
       likes: 0, 
       isLiked: false 
@@ -63,9 +66,9 @@ export default function PostDetail({ user }) {
         <div className="detail-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #ddd', paddingBottom: '15px', marginBottom: '20px' }}>
           <div style={{ flex: 1, paddingRight: '15px' }}>
             <h2 style={{ border: 'none', margin: 0, padding: 0 }}>{post.title}</h2>
-            {/* 🌟 게시글 작성자 클릭 */}
+            {/* 🌟 게시글 작성자 클릭 시 팝업창 띄우기 */}
             <div style={{ marginTop: '10px', fontSize: '0.95rem', color: '#666' }}>
-              작성자: <Link to={`/user/${post.userId}`} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>User{post.userId}</Link>
+              작성자: <span onClick={() => setPopupUserId(post.userId)} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>User{post.userId}</span>
             </div>
           </div>
           
@@ -101,10 +104,10 @@ export default function PostDetail({ user }) {
             {comments.map((comment) => (
               <div key={comment.id} style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '4px', marginBottom: '10px', width: '100%', border: '1px solid #eee' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
-                  {/* 🌟 댓글 작성자 클릭 시 프로필로 이동 */}
-                  <Link to={`/user/${comment.userId || 1}`} style={{ color: '#0d6efd', textDecoration: 'none' }}>
-                    <strong style={{ fontSize: '1.05rem' }}>{comment.name}</strong>
-                  </Link>
+                  {/* 🌟 댓글 작성자 클릭 시 팝업창 띄우기 */}
+                  <span onClick={() => setPopupUserId(comment.userId || 1)} style={{ color: '#0d6efd', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.05rem' }}>
+                    {comment.name}
+                  </span>
                   <button onClick={() => toggleCommentLike(comment.id)} className={`like-btn ${comment.isLiked ? 'active' : ''}`} style={{ padding: '3px 10px', fontSize: '0.8rem' }}>
                     {(comment.likes || 0) === 0 ? "👍좋아요" : `👍좋아요 ${comment.likes}`}
                   </button>
@@ -116,6 +119,9 @@ export default function PostDetail({ user }) {
         </div>
 
       </div>
+
+      {/* 🌟 유저 팝업 모달 */}
+      <UserModal userId={popupUserId} onClose={() => setPopupUserId(null)} />
     </div>
   );
 }

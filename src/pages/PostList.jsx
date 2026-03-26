@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
+import UserModal from '../components/UserModal'; // 🌟 팝업 컴포넌트 불러오기
 
 export default function PostList() {
   const [posts, setPosts] = useState([]);
   const [keyword, setKeyword] = useState('');
+  const [popupUserId, setPopupUserId] = useState(null); // 🌟 팝업에 띄울 유저 ID 상태
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,9 +35,9 @@ export default function PostList() {
                 <div className="post-preview">{post.body}</div>
               </div>
               <div className="post-item-bottom">
-                {/* 🌟 작성자 이름 클릭 시 프로필로 이동 */}
                 <div style={{ marginBottom: '5px' }}>
-                  작성자: <Link to={`/user/${post.userId}`} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>User{post.userId}</Link>
+                  {/* 🌟 팝업창 띄우기 이벤트 적용 */}
+                  작성자: <span onClick={() => setPopupUserId(post.userId)} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>User{post.userId}</span>
                 </div>
                 <div>조회수: {views} | 좋아요: {Math.floor(0)} | 댓글: {Math.floor(0)}</div>
               </div>
@@ -43,6 +45,9 @@ export default function PostList() {
           );
         })}
       </div>
+
+      {/* 🌟 유저 팝업 모달 (popupUserId 값이 있을 때만 화면에 나옴) */}
+      <UserModal userId={popupUserId} onClose={() => setPopupUserId(null)} />
     </div>
   );
 }
