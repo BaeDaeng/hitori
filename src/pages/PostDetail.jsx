@@ -23,14 +23,24 @@ export default function PostDetail({ user }) {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentBody, setEditCommentBody] = useState('');
 
+  // 🌟 시간 오차 9시간을 완벽하게 해결한 한국 시간(KST) 변환 함수
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    // 1. 서버에서 'Z'를 안 붙여서 보낼 경우를 대비해, 무조건 UTC로 인식하도록 강제 처리
+    const utcString = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+    const date = new Date(utcString);
+    
+    // 2. 브라우저 설정과 무관하게 무조건 +9시간을 더해서 한국 시간으로 만듦
+    const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+    
+    // 3. 연, 월, 일, 시, 분을 예쁘게 뽑아냄
+    const year = kstDate.getUTCFullYear();
+    const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kstDate.getUTCDate()).padStart(2, '0');
+    const hours = String(kstDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(kstDate.getUTCMinutes()).padStart(2, '0');
+    
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
@@ -45,7 +55,7 @@ export default function PostDetail({ user }) {
           setIsLiked(data.liked || false);
         }
       })
-      .catch(console.error);
+      .catch((error) => console.error(error));
     
     localStorage.setItem(`view_${id}`, views);
   }, [id, views]);
@@ -63,7 +73,7 @@ export default function PostDetail({ user }) {
         setIsLiked(true);
       }
     } catch (error) {
-      console.error(error); // ESLint 에러 해결
+      console.error(error);
       alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
@@ -77,7 +87,7 @@ export default function PostDetail({ user }) {
           navigate('/');
         }
       } catch (error) {
-        console.error(error); // ESLint 에러 해결
+        console.error(error);
         alert('게시글 삭제에 실패했습니다.');
       }
     }
@@ -98,7 +108,7 @@ export default function PostDetail({ user }) {
         ));
       }
     } catch (error) {
-      console.error(error); // ESLint 에러 해결
+      console.error(error);
       alert('댓글 좋아요 처리 중 오류가 발생했습니다.');
     }
   };
@@ -117,7 +127,7 @@ export default function PostDetail({ user }) {
         setNewComment('');
       }
     } catch (error) {
-      console.error(error); // ESLint 에러 해결
+      console.error(error);
       alert('댓글 작성에 실패했습니다.');
     }
   };
@@ -146,7 +156,7 @@ export default function PostDetail({ user }) {
         setEditCommentBody('');
       }
     } catch (error) {
-      console.error(error); // ESLint 에러 해결
+      console.error(error);
       alert('댓글 수정에 실패했습니다.');
     }
   };
@@ -159,13 +169,15 @@ export default function PostDetail({ user }) {
           setComments(comments.filter(c => c.commentId !== commentId));
         }
       } catch (error) {
-        console.error(error); // ESLint 에러 해결
+        console.error(error);
         alert('댓글 삭제에 실패했습니다.');
       }
     }
   };
 
   if (!post) return <div style={{ textAlign: 'center', marginTop: '50px' }}>로딩 중...</div>;
+
+  const isPostEdited = post.updatedAt && post.createdAt !== post.updatedAt;
 
   return (
     <div style={{ display: 'block', width: '100%', padding: '50px 15px' }}>
@@ -180,7 +192,8 @@ export default function PostDetail({ user }) {
           </div>
           
           <div style={{ textAlign: 'right', color: '#666', fontSize: '0.9rem', flexShrink: 0 }}>
-            <div>작성시간 : {formatDate(post.createdAt)}</div>
+            <div>{isPostEdited ? `수정시간 : ${formatDate(post.updatedAt)}` : `작성시간 : ${formatDate(post.createdAt)}`}</div>
+            
             {user && user.nickname === post.writer && (
               <div style={{ marginTop: '10px', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                 <Link to={`/edit/${id}`} className="action-btn" style={{ padding: '5px 10px', fontSize: '0.85rem' }}>수정</Link>
@@ -209,50 +222,52 @@ export default function PostDetail({ user }) {
           </form>
 
           <div style={{ width: '100%' }}>
-            {comments.map((comment) => (
-              <div key={comment.commentId} style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '4px', marginBottom: '10px', width: '100%', border: '1px solid #eee' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span onClick={() => setPopupUserId(comment.writer)} style={{ color: '#0d6efd', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.05rem' }}>
-                      {comment.writer}
-                    </span>
-                    <span style={{ fontSize: '0.85rem', color: '#888' }}>
-                      {comment.updatedAt && comment.updatedAt !== comment.createdAt 
-                        ? `수정시간: ${formatDate(comment.updatedAt)}` 
-                        : `작성시간: ${formatDate(comment.createdAt)}`}
-                    </span>
+            {comments.map((comment) => {
+              const isCommentEdited = comment.updatedAt && comment.createdAt !== comment.updatedAt;
+
+              return (
+                <div key={comment.commentId} style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '4px', marginBottom: '10px', width: '100%', border: '1px solid #eee' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span onClick={() => setPopupUserId(comment.writer)} style={{ color: '#0d6efd', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.05rem' }}>
+                        {comment.writer}
+                      </span>
+                      <span style={{ fontSize: '0.85rem', color: '#888' }}>
+                        {isCommentEdited ? `수정시간: ${formatDate(comment.updatedAt)}` : `작성시간: ${formatDate(comment.createdAt)}`}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {user && user.nickname === comment.writer && editingCommentId !== comment.commentId && (
+                        <>
+                          <button onClick={() => startEditing(comment)} className="action-btn" style={{ padding: '3px 10px', fontSize: '0.8rem', backgroundColor: '#e9ecef', color: '#495057' }}>
+                            수정
+                          </button>
+                          <button onClick={() => deleteComment(comment.commentId)} className="danger-btn" style={{ padding: '3px 10px', fontSize: '0.8rem' }}>
+                            삭제
+                          </button>
+                        </>
+                      )}
+                      <button onClick={() => toggleCommentLike(comment)} className={`like-btn ${comment.liked ? 'active' : ''}`} style={{ padding: '3px 10px', fontSize: '0.8rem' }}>
+                        {(comment.likeCount || 0) === 0 ? "👍좋아요" : `👍좋아요 ${comment.likeCount}`}
+                      </button>
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {user && user.nickname === comment.writer && editingCommentId !== comment.commentId && (
-                      <>
-                        <button onClick={() => startEditing(comment)} className="action-btn" style={{ padding: '3px 10px', fontSize: '0.8rem', backgroundColor: '#e9ecef', color: '#495057' }}>
-                          수정
-                        </button>
-                        <button onClick={() => deleteComment(comment.commentId)} className="danger-btn" style={{ padding: '3px 10px', fontSize: '0.8rem' }}>
-                          삭제
-                        </button>
-                      </>
-                    )}
-                    <button onClick={() => toggleCommentLike(comment)} className={`like-btn ${comment.liked ? 'active' : ''}`} style={{ padding: '3px 10px', fontSize: '0.8rem' }}>
-                      {(comment.likeCount || 0) === 0 ? "👍좋아요" : `👍좋아요 ${comment.likeCount}`}
-                    </button>
-                  </div>
+                  {editingCommentId === comment.commentId ? (
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                      <input type="text" value={editCommentBody} onChange={(e) => setEditCommentBody(e.target.value)} style={{ flex: 1, margin: 0, padding: '10px' }} autoFocus />
+                      <button onClick={() => saveEdit(comment.commentId)} className="primary-btn" style={{ width: '60px', padding: '10px 0', fontSize: '0.9rem' }}>저장</button>
+                      <button onClick={cancelEditing} className="action-btn" style={{ width: '60px', padding: '10px 0', fontSize: '0.9rem' }}>취소</button>
+                    </div>
+                  ) : (
+                    <div style={{ color: '#222' }}>{comment.commentContent}</div>
+                  )}
+
                 </div>
-
-                {editingCommentId === comment.commentId ? (
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <input type="text" value={editCommentBody} onChange={(e) => setEditCommentBody(e.target.value)} style={{ flex: 1, margin: 0, padding: '10px' }} autoFocus />
-                    <button onClick={() => saveEdit(comment.commentId)} className="primary-btn" style={{ width: '60px', padding: '10px 0', fontSize: '0.9rem' }}>저장</button>
-                    <button onClick={cancelEditing} className="action-btn" style={{ width: '60px', padding: '10px 0', fontSize: '0.9rem' }}>취소</button>
-                  </div>
-                ) : (
-                  <div style={{ color: '#222' }}>{comment.commentContent}</div>
-                )}
-
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
