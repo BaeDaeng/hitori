@@ -17,32 +17,54 @@ export default function SearchResults() {
   useEffect(() => {
     if (!query.trim()) return;
 
-    // 1. 게시물 검색
+    // 🌟 게시글 전체를 불러와서 게시글 검색과 유저 검색을 동시에 처리합니다.
     api.get('/api/posts/all-post')
-      .then((res) => {
+      .then(async (res) => {
         if (res.data.success) {
-          const filteredPosts = res.data.data.filter(post => 
+          const allPosts = res.data.data;
+
+          // 1. 게시물 검색 (부분 일치)
+          const filteredPosts = allPosts.filter(post => 
             post.title.toLowerCase().includes(query.toLowerCase()) ||
             post.postContent.toLowerCase().includes(query.toLowerCase())
           );
           setPostResults(filteredPosts);
-        }
-      })
-      .catch((error) => console.error(error)); // 여기서도 만약을 위해 명시적으로 처리
 
-    // 2. 사용자 검색
-    api.get(`/api/users/user-info/${query}`)
-      .then((res) => {
-        if (res.data.success && res.data.data) {
-          setUserResults([res.data.data]);
-        } else {
-          setUserResults([]);
+          // 🌟 2. 사용자 검색 우회 로직 (부분 일치 & 본인 포함)
+          // 2-1. 모든 게시글에서 작성자 닉네임만 추출 후 중복 제거
+          const uniqueWriters = [...new Set(allPosts.map(post => post.writer))];
+
+          // 2-2. 검색어가 닉네임에 일부분이라도 포함된 사람만 필터링
+          const matchedWriters = uniqueWriters.filter(writer => 
+            writer.toLowerCase().includes(query.toLowerCase())
+          );
+
+          // 2-3. 필터링된 유저들의 상세 프로필을 각각 요청
+          const userPromises = matchedWriters.map(writer => 
+            api.get(`/api/users/user-info/${writer}`)
+              .then(response => {
+                if (response.data.success) return response.data.data;
+                return null;
+              })
+              .catch((error) => {
+                console.error(`프로필 조회 실패 (${writer}):`, error);
+                // 🌟 핵심: 백엔드가 본인 조회를 막아서 에러가 나더라도 화면에 표시함!
+                return { 
+                  userId: writer, 
+                  nickname: writer, 
+                  name: '회원', 
+                  profilePic: null 
+                };
+              })
+          );
+
+          // 모든 유저 정보 요청이 끝날 때까지 기다린 후 상태 업데이트
+          const usersData = await Promise.all(userPromises);
+          setUserResults(usersData.filter(user => user !== null));
         }
       })
-      .catch((error) => {
-        console.error(error); // 🌟 ESLint 에러 해결 (변수 사용)
-        setUserResults([]);
-      });
+      .catch((error) => console.error('검색 중 오류 발생:', error));
+
   }, [query]);
 
   const handleSearch = (e) => {
@@ -57,7 +79,7 @@ export default function SearchResults() {
           type="text" 
           value={keyword} 
           onChange={(e) => setKeyword(e.target.value)} 
-          placeholder="검색어를 입력하세요 (유저 검색은 닉네임 정확히 입력)"
+          placeholder="검색어를 입력하세요 (닉네임 일부만 입력해도 검색 가능)"
           style={{ margin: 0 }} 
         />
         <button type="submit" className="primary-btn" style={{ width: '100px', margin: 0 }}>검색</button>
@@ -74,7 +96,7 @@ export default function SearchResults() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
             {userResults.map(user => (
               <div 
-                key={user.userId} 
+                key={user.userId || user.nickname} 
                 onClick={() => setPopupUserId(user.nickname)}
                 style={{ 
                   backgroundColor: '#fff', padding: '20px', borderRadius: '10px', border: '1px solid #dee2e6', 
