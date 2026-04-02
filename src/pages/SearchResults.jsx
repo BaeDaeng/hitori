@@ -1,41 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import UserModal from '../components/UserModal'; // 🌟 유저 모달 컴포넌트 추가
+import UserModal from '../components/UserModal';
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const [keyword, setKeyword] = useState(query);
   
-  const [postResults, setPostResults] = useState([]); // 게시물 결과
-  const [userResults, setUserResults] = useState([]); // 🌟 사용자 결과 추가
+  const [postResults, setPostResults] = useState([]); 
+  const [userResults, setUserResults] = useState([]); 
   
-  const [popupUserId, setPopupUserId] = useState(null); // 팝업용 ID 상태
+  const [popupUserId, setPopupUserId] = useState(null); 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!query.trim()) return;
 
-    // 1. 게시물 검색 (제목에 키워드 포함 여부)
-    api.get('/posts').then((res) => {
-      const filteredPosts = res.data.filter(post => 
-        post.title.toLowerCase().includes(query.toLowerCase())
-      );
-      setPostResults(filteredPosts);
-    });
+    // 1. 게시물 검색
+    api.get('/api/posts/all-post')
+      .then((res) => {
+        if (res.data.success) {
+          const filteredPosts = res.data.data.filter(post => 
+            post.title.toLowerCase().includes(query.toLowerCase()) ||
+            post.postContent.toLowerCase().includes(query.toLowerCase())
+          );
+          setPostResults(filteredPosts);
+        }
+      })
+      .catch((error) => console.error(error)); // 여기서도 만약을 위해 명시적으로 처리
 
-    // 2. 사용자 검색 (이름 또는 유저네임에 키워드 포함 여부)
-    api.get('/users').then((res) => {
-      const filteredUsers = res.data.filter(user => 
-        user.name.toLowerCase().includes(query.toLowerCase()) || 
-        user.username.toLowerCase().includes(query.toLowerCase())
-      );
-      setUserResults(filteredUsers);
-    }).catch(() => {
-      // API 오류 시 빈 배열 처리
-      setUserResults([]);
-    });
+    // 2. 사용자 검색
+    api.get(`/api/users/user-info/${query}`)
+      .then((res) => {
+        if (res.data.success && res.data.data) {
+          setUserResults([res.data.data]);
+        } else {
+          setUserResults([]);
+        }
+      })
+      .catch((error) => {
+        console.error(error); // 🌟 ESLint 에러 해결 (변수 사용)
+        setUserResults([]);
+      });
   }, [query]);
 
   const handleSearch = (e) => {
@@ -45,13 +52,12 @@ export default function SearchResults() {
 
   return (
     <div className="page-wrapper">
-      {/* 상단 검색바 유지 */}
       <form className="search-bar" onSubmit={handleSearch}>
         <input 
           type="text" 
           value={keyword} 
           onChange={(e) => setKeyword(e.target.value)} 
-          placeholder="검색어를 입력하세요"
+          placeholder="검색어를 입력하세요 (유저 검색은 닉네임 정확히 입력)"
           style={{ margin: 0 }} 
         />
         <button type="submit" className="primary-btn" style={{ width: '100px', margin: 0 }}>검색</button>
@@ -61,15 +67,15 @@ export default function SearchResults() {
         "{query}" 검색 결과
       </h2>
 
-      {/* 🌟 1. 사용자 검색 결과 섹션 */}
+      {/* 1. 사용자 검색 결과 섹션 */}
       <div style={{ marginBottom: '50px' }}>
         <h3 style={{ marginBottom: '20px', color: '#495057' }}>사용자 ({userResults.length})</h3>
         {userResults.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
             {userResults.map(user => (
               <div 
-                key={user.id} 
-                onClick={() => setPopupUserId(user.id)} // 클릭 시 모달 오픈
+                key={user.userId} 
+                onClick={() => setPopupUserId(user.nickname)}
                 style={{ 
                   backgroundColor: '#fff', padding: '20px', borderRadius: '10px', border: '1px solid #dee2e6', 
                   textAlign: 'center', cursor: 'pointer', transition: 'transform 0.2s' 
@@ -77,10 +83,10 @@ export default function SearchResults() {
                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
-                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e9ecef', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd' }}>
-                  사진
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e9ecef', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd', overflow: 'hidden' }}>
+                  {user.profilePic ? <img src={user.profilePic} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '사진'}
                 </div>
-                <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#0d6efd' }}>{user.username || `User${user.id}`}</div>
+                <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#0d6efd' }}>{user.nickname}</div>
                 <div style={{ fontSize: '0.9rem', color: '#6c757d' }}>{user.name}</div>
               </div>
             ))}
@@ -95,18 +101,18 @@ export default function SearchResults() {
         <h3 style={{ marginBottom: '20px', color: '#495057' }}>게시물 ({postResults.length})</h3>
         {postResults.length > 0 ? (
           postResults.map((post) => {
-            const views = localStorage.getItem(`view_${post.id}`) || 0;
+            const views = localStorage.getItem(`view_${post.postId}`) || 0;
             return (
-              <div key={post.id} className="post-item">
+              <div key={post.postId} className="post-item">
                 <div className="post-item-top">
-                  <Link to={`/post/${post.id}`} className="post-title">{post.title}</Link>
-                  <div className="post-preview">{post.body}</div>
+                  <Link to={`/post/${post.postId}`} className="post-title">{post.title}</Link>
+                  <div className="post-preview">{post.postContent}</div>
                 </div>
                 <div className="post-item-bottom">
                   <div style={{ marginBottom: '5px' }}>
-                    작성자: <span onClick={() => setPopupUserId(post.userId)} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>User{post.userId}</span>
+                    작성자: <span onClick={() => setPopupUserId(post.writer)} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>{post.writer}</span>
                   </div>
-                  <div>조회수: {views} | 좋아요: 0 | 댓글: 0</div>
+                  <div>조회수: {views} | 좋아요: {post.likeCount || 0} | 댓글: {post.comments ? post.comments.length : 0}</div>
                 </div>
               </div>
             );
@@ -116,7 +122,6 @@ export default function SearchResults() {
         )}
       </div>
 
-      {/* 유저 클릭 시 상세 팝업 */}
       <UserModal userId={popupUserId} onClose={() => setPopupUserId(null)} />
     </div>
   );
