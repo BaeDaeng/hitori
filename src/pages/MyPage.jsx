@@ -41,8 +41,9 @@ export default function MyPage({ user }) {
         
         {/* 프로필 이미지 */}
         <div className="responsive-img-container" style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#eee', overflow: 'hidden', flexShrink: 0 }}>
-          {myInfo.profilePic ? (
-            <img src={myInfo.profilePic} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {/* 🌟 profilePic -> profileImageUrl 로 변경! */}
+          {myInfo.profileImageUrl ? (
+            <img src={myInfo.profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <span style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#999' }}>사진 없음</span>
           )}

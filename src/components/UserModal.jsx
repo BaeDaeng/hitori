@@ -23,7 +23,7 @@ export default function UserModal({ userId, onClose }) {
         setUserInfo({ 
           nickname: userId, 
           name: '알 수 없는 유저',
-          profilePic: null
+          profileImageUrl: null // 🌟 profilePic -> profileImageUrl 로 수정
         });
       });
   }, [userId]);
@@ -40,9 +40,9 @@ export default function UserModal({ userId, onClose }) {
         {userInfo ? (
           <>
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f8f9fa', border: '1px solid #ddd', margin: '0 auto 15px', overflow: 'hidden' }}>
-              {/* 프로필 사진이 있으면 출력, 없으면 '사진' 텍스트 출력 */}
-              {userInfo.profilePic ? (
-                <img src={userInfo.profilePic} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {/* 🌟 렌더링 부분도 profileImageUrl 로 수정 */}
+              {userInfo.profileImageUrl ? (
+                <img src={userInfo.profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <span style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '0.85rem' }}>사진</span>
               )}

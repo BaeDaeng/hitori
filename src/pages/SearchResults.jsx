@@ -48,12 +48,12 @@ export default function SearchResults() {
               })
               .catch((error) => {
                 console.error(`프로필 조회 실패 (${writer}):`, error);
-                // 🌟 핵심: 백엔드가 본인 조회를 막아서 에러가 나더라도 화면에 표시함!
+                // 🌟 백엔드가 본인 조회를 막아서 에러가 나더라도 화면에 표시 (profileImageUrl로 수정)
                 return { 
                   userId: writer, 
                   nickname: writer, 
                   name: '회원', 
-                  profilePic: null 
+                  profileImageUrl: null // 변수명 수정 완료!
                 };
               })
           );
@@ -106,7 +106,8 @@ export default function SearchResults() {
                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e9ecef', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd', overflow: 'hidden' }}>
-                  {user.profilePic ? <img src={user.profilePic} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '사진'}
+                  {/* 🌟 화면에 그려주는 부분도 profileImageUrl로 수정 완료! */}
+                  {user.profileImageUrl ? <img src={user.profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '사진'}
                 </div>
                 <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#0d6efd' }}>{user.nickname}</div>
                 <div style={{ fontSize: '0.9rem', color: '#6c757d' }}>{user.name}</div>
