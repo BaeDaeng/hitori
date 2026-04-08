@@ -56,8 +56,9 @@ export default function EditProfile() {
       if (selectedFile) {
         payload.append('profileImage', selectedFile);
       }
-
+      // post or put
       const infoRes = await api.post('/api/users/update-info', payload);
+      //const infoRes = await api.put('/api/users/update-info', payload);
 
       if (infoRes.data.success) {
         // 비밀번호가 입력되었을 때만 비밀번호 변경 API 호출
