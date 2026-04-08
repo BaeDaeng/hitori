@@ -23,7 +23,6 @@ export default function PostDetail({ user }) {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentBody, setEditCommentBody] = useState('');
 
-  // 🌟 시간 오차 9시간을 완벽하게 해결한 한국 시간(KST) 변환 함수
   const formatDate = (dateString) => {
     if (!dateString) return '';
     

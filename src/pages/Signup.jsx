@@ -39,7 +39,6 @@ export default function Signup() {
         payload.append('profileImage', selectedFile);
       }
 
-      // 🌟 [수정됨] headers 수동 설정을 완전히 지웠습니다. Axios가 자동으로 처리합니다.
       const res = await api.post('/api/users/sign-up', payload);
 
       if (res.data.success) {
@@ -71,7 +70,7 @@ export default function Signup() {
            <input type="text" name="name" placeholder="이름" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px' }} />
            <input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px' }} />
            
-           {/* 🌟 [수정됨] 생년월일 입력을 캘린더 형식(type="date")으로 변경하여 서버 양식 강제 맞춤 */}
+           {/* 생년월일 입력을 캘린더 형식(type="date")으로 변경하여 서버 양식 강제 맞춤 */}
            <input type="date" name="age" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px', fontFamily: 'inherit' }} />
            
            <select name="gender" onChange={handleChange} style={{ width: '100%', marginBottom: '15px', padding: '10px' }}>

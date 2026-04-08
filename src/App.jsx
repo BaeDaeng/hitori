@@ -10,13 +10,12 @@ import MyPage from './pages/MyPage';
 import SearchResults from './pages/SearchResults';
 import EditProfile from './pages/EditProfile';
 import UserProfile from './pages/UserProfile';
-import api from './api'; // 🌟 API 호출을 위해 추가
+import api from './api';
 import './App.css';
 
 export default function App() {
   const [user, setUser] = useState(null);
 
-  // 🌟 새로고침 시 로그인 유지 (자동 로그인 로직)
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (token) {
@@ -35,7 +34,6 @@ export default function App() {
     }
   }, []);
 
-  // 🌟 실제 로그아웃 처리
   const handleLogout = async () => {
     try {
       // 백엔드 로그아웃 API 호출 (명세에 따라 GET/POST 확인 필요, 일반적으로 POST)
@@ -58,7 +56,6 @@ export default function App() {
             <>
               <Link to="/write" className="nav-btn">새 글 쓰기</Link>
               <Link to="/mypage" className="nav-btn">마이페이지</Link>
-              {/* 🌟 기존 단순 setUser(null)에서 handleLogout 함수로 변경 */}
               <button onClick={handleLogout} className="logout-btn">로그아웃</button>
             </>
           ) : (
@@ -81,7 +78,6 @@ export default function App() {
           <Route path="/mypage" element={user ? <MyPage user={user} /> : <Navigate to="/login" />} />
           <Route path="/edit-profile" element={user ? <EditProfile /> : <Navigate to="/login" />} />
           
-          {/* 🌟 PostWrite, PostEdit에서 불필요한 user props 제거 */}
           <Route path="/write" element={user ? <PostWrite /> : <Navigate to="/login" />} />
           <Route path="/edit/:id" element={user ? <PostEdit /> : <Navigate to="/login" />} />
           

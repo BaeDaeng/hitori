@@ -10,7 +10,6 @@ export default function PostWrite() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 🌟 게시글 생성 API 연동
       const res = await api.post('/api/posts/post-create', { 
         title: title, 
         postContent: postContent 

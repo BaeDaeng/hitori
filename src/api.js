@@ -6,7 +6,7 @@ const api = axios.create({
   timeout: 5000,
 });
 
-// 🌟 핵심: 서버에 요청을 보내기 직전에 가로채서 헤더에 토큰을 몰래 넣어주는 역할
+// 핵심: 서버에 요청을 보내기 직전에 가로채서 헤더에 토큰을 몰래 넣어주는 역할
 api.interceptors.request.use((config) => {
   // 로그인할 때 로컬 스토리지에 저장했던 토큰을 꺼내옵니다.
   const token = localStorage.getItem('accessToken');

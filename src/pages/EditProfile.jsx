@@ -57,7 +57,6 @@ export default function EditProfile() {
         payload.append('profileImage', selectedFile);
       }
 
-      // 🌟 [수정됨] headers 없이 payload만 보냅니다.
       const infoRes = await api.post('/api/users/update-info', payload);
 
       if (infoRes.data.success) {
@@ -113,7 +112,6 @@ export default function EditProfile() {
         <input type="text" value={formData.nickname} onChange={(e) => setFormData({...formData, nickname: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px' }}/>
         
         <label style={{ display: 'block', marginTop: '10px' }}>생년월일</label>
-        {/* 🌟 [수정됨] 달력 UI 강제 적용 */}
         <input type="date" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px', fontFamily: 'inherit' }} />
 
         <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>

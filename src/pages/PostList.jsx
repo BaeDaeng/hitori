@@ -10,7 +10,6 @@ export default function PostList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 🌟 게시글 전체 내림차순 조회 API 연동
     api.get('/api/posts/all-post')
       .then((res) => {
         if (res.data.success) {

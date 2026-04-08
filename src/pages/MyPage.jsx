@@ -13,7 +13,6 @@ useEffect(() => {
   api.get('/api/users/my-info')
     .then((res) => {
       if (res.data.success) {
-        // 🌟 콘솔에서 주소를 직접 확인합니다.
         console.log("받아온 프로필 주소:", res.data.data.profileImageUrl);
         setMyInfo(res.data.data);
       }
@@ -43,7 +42,6 @@ useEffect(() => {
         
         {/* 프로필 이미지 */}
         <div className="responsive-img-container" style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#eee', overflow: 'hidden', flexShrink: 0 }}>
-          {/* 🌟 profilePic -> profileImageUrl 로 변경! */}
           {myInfo.profileImageUrl ? (
             <img src={myInfo.profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (

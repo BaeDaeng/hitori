@@ -24,7 +24,7 @@ export default function UserProfile() {
           nickname: id,
           gender: '비공개',
           age: '비공개',
-          profileImageUrl: null, // 🌟 profilePic -> profileImageUrl 로 수정
+          profileImageUrl: null, 
         });
       });
 
@@ -50,7 +50,6 @@ export default function UserProfile() {
         {/* 상단: 프로필 정보 */}
         <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', marginBottom: '30px', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#f8f9fa', border: '1px solid #ddd', overflow: 'hidden', flexShrink: 0, margin: '0 auto' }}>
-            {/* 🌟 렌더링 부분도 profileImageUrl 로 수정! */}
             {profileUser.profileImageUrl ? (
               <img src={profileUser.profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (

@@ -17,7 +17,6 @@ export default function SearchResults() {
   useEffect(() => {
     if (!query.trim()) return;
 
-    // 🌟 게시글 전체를 불러와서 게시글 검색과 유저 검색을 동시에 처리합니다.
     api.get('/api/posts/all-post')
       .then(async (res) => {
         if (res.data.success) {
@@ -30,7 +29,7 @@ export default function SearchResults() {
           );
           setPostResults(filteredPosts);
 
-          // 🌟 2. 사용자 검색 우회 로직 (부분 일치 & 본인 포함)
+          //  2. 사용자 검색 우회 로직 (부분 일치 & 본인 포함)
           // 2-1. 모든 게시글에서 작성자 닉네임만 추출 후 중복 제거
           const uniqueWriters = [...new Set(allPosts.map(post => post.writer))];
 
@@ -48,7 +47,7 @@ export default function SearchResults() {
               })
               .catch((error) => {
                 console.error(`프로필 조회 실패 (${writer}):`, error);
-                // 🌟 백엔드가 본인 조회를 막아서 에러가 나더라도 화면에 표시 (profileImageUrl로 수정)
+                // 백엔드가 본인 조회를 막아서 에러가 나더라도 화면에 표시 (profileImageUrl로 수정)
                 return { 
                   userId: writer, 
                   nickname: writer, 
@@ -106,7 +105,6 @@ export default function SearchResults() {
                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e9ecef', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd', overflow: 'hidden' }}>
-                  {/* 🌟 화면에 그려주는 부분도 profileImageUrl로 수정 완료! */}
                   {user.profileImageUrl ? <img src={user.profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '사진'}
                 </div>
                 <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#0d6efd' }}>{user.nickname}</div>

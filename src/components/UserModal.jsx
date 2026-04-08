@@ -10,7 +10,7 @@ export default function UserModal({ userId, onClose }) {
   useEffect(() => {
     if (!userId) return;
     
-    // 🌟 다른 사용자 정보 조회 API 연동 (닉네임 기반)
+    // 다른 사용자 정보 조회 API 연동 (닉네임 기반)
     api.get(`/api/users/user-info/${userId}`)
       .then(res => {
         if (res.data.success) {
@@ -23,7 +23,7 @@ export default function UserModal({ userId, onClose }) {
         setUserInfo({ 
           nickname: userId, 
           name: '알 수 없는 유저',
-          profileImageUrl: null // 🌟 profilePic -> profileImageUrl 로 수정
+          profileImageUrl: null
         });
       });
   }, [userId]);
