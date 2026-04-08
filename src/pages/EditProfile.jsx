@@ -2,23 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
-export default function EditProfile({ user, setUser }) {
-  // 1. 기본 정보 상태
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    nickname: user?.nickname || '',
-    age: user?.age || ''
-  });
-
-  // 2. 비밀번호 변경 상태
-  const [pwData, setPwData] = useState({
-    password: '',
-    newPassword: '',
-    newPasswordConfirm: ''
-  });
-
-  // 🌟 변수명을 백엔드와 동일하게 profileImageUrl로 통일합니다.
-  const [profileImageUrl, setProfileImageUrl] = useState(user?.profileImageUrl || null);
+export default function EditProfile() {
+  const [formData, setFormData] = useState({ name: '', nickname: '', age: '' });
+  const [pwData, setPwData] = useState({ password: '', newPassword: '', newPasswordConfirm: '' });
+  const [profileImageUrl, setProfileImageUrl] = useState(null); // 화면 표시용
+  const [selectedFile, setSelectedFile] = useState(null); // 서버 전송용 파일
   
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawId, setWithdrawId] = useState('');
@@ -26,159 +14,121 @@ export default function EditProfile({ user, setUser }) {
   const navigate = useNavigate();
   const fileInputRef = useRef();
 
-  // 페이지 진입 시 최신 정보 불러오기
   useEffect(() => {
     api.get('/api/users/my-info')
       .then((res) => {
         if (res.data.success) {
-          const myData = res.data.data;
-          setFormData({
-            name: myData.name || '',
-            nickname: myData.nickname || '',
-            age: myData.age || ''
-          });
-          // 🌟 백엔드 응답 필드명인 profileImageUrl에서 데이터를 가져옵니다.
-          setProfileImageUrl(myData.profileImageUrl || null);
+          const d = res.data.data;
+          setFormData({ name: d.name || '', nickname: d.nickname || '', age: d.age || '' });
+          setProfileImageUrl(d.profileImageUrl || null);
         }
       })
-      .catch((error) => console.error("내 정보 불러오기 실패:", error));
+      .catch(console.error);
   }, []);
 
-  // S3 이미지 업로드 API 연동
-  const handlePicUpload = async (e) => {
+  // 사진을 선택했을 때 S3에 바로 올리지 않고, 파일 객체만 보관합니다.
+  const handlePicSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const uploadData = new FormData();
-    uploadData.append('file', file);
-
-    try {
-      const res = await api.post('/api/s3/image-upload?pathName=PROFILE', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      if (res.data.success) {
-        // S3 업로드 성공 시 반환되는 URL을 상태에 저장
-        setProfileImageUrl(res.data.data.imageUrl); 
-        alert('프로필 이미지가 업로드되었습니다.');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('이미지 업로드에 실패했습니다.');
-    }
+    setSelectedFile(file);
+    setProfileImageUrl(URL.createObjectURL(file)); // 미리보기 업데이트
   };
 
-  // 🌟 정보 수정 저장 (사진 주소 포함)
   const handleSave = async () => {
+    if (!formData.name.trim() || !formData.nickname.trim()) {
+      return alert('이름과 닉네임은 필수입니다.');
+    }
+
     try {
-      // (1) 회원 정보 수정 API 호출 시 profileImageUrl을 반드시 포함합니다.
-      const infoRes = await api.put('/api/users/update-info', {
-        name: formData.name,
-        nickname: formData.nickname,
-        age: formData.age,
-        profileImageUrl: profileImageUrl // 🌟 이 부분이 추가되어야 DB에 사진이 저장됩니다!
-      });
-
-      if (!infoRes.data.success) throw new Error('정보 수정 실패');
-
-      // (2) 비밀번호 수정 로직 (입력된 경우에만)
-      if (pwData.newPassword) {
-        if (pwData.newPassword !== pwData.newPasswordConfirm) {
-          return alert('새 비밀번호가 일치하지 않습니다.');
-        }
-        if (!pwData.password) {
-          return alert('기존 비밀번호를 입력해주세요.');
-        }
-
-        const pwRes = await api.put('/api/users/update-pw', {
-          password: pwData.password,
-          newPassword: pwData.newPassword
-        });
-
-        if (!pwRes.data.success) throw new Error('비밀번호 수정 실패');
+      // 🌟 JSON 대신 FormData 보따리를 생성하여 백엔드 명세와 맞춥니다.
+      const payload = new FormData();
+      payload.append('name', formData.name.trim());
+      payload.append('nickname', formData.nickname.trim());
+      
+      if (formData.age) {
+        // Swagger date 형식에 맞춰 YYYY-MM-DD만 추출
+        payload.append('age', formData.age.split('T')[0]);
       }
 
-      // 수정 성공 시 리액트 전역 상태 업데이트
-      setUser({ ...user, ...formData, profileImageUrl });
-      alert('정보가 성공적으로 수정되었습니다.');
-      navigate('/mypage');
+      // 🌟 사진을 새로 선택했다면 'profileImage'라는 이름으로 파일 원본을 담습니다.
+      if (selectedFile) {
+        payload.append('profileImage', selectedFile);
+      }
 
+      // 🌟 headers를 명시하지 않아도 axios가 FormData를 감지하여 자동으로 처리합니다.
+      const infoRes = await api.put('/api/users/update-info', payload);
+
+      if (infoRes.data.success) {
+        // 비밀번호 수정 (입력된 경우만)
+        if (pwData.newPassword) {
+          if (pwData.newPassword !== pwData.newPasswordConfirm) return alert('새 비밀번호 불일치');
+          await api.put('/api/users/update-pw', {
+            password: pwData.password,
+            newPassword: pwData.newPassword
+          });
+        }
+        alert('정보가 수정되었습니다.');
+        navigate('/mypage');
+      }
     } catch (error) {
-      console.error(error);
-      alert('정보 수정 중 오류가 발생했습니다.');
+      console.error("수정 실패 상세:", error.response?.data);
+      const msg = error.response?.data?.message || '입력 양식을 확인해주세요.';
+      alert(`정보 수정 실패: ${msg}`);
     }
   };
 
-  // 회원 탈퇴
   const handleWithdraw = async () => {
     try {
       const res = await api.delete('/api/users/delete-user');
       if (res.data.success) {
-        alert('탈퇴 처리되었습니다. 이용해 주셔서 감사합니다.');
+        alert('탈퇴 처리되었습니다.');
         localStorage.removeItem('accessToken');
-        setUser(null);
         navigate('/');
+        window.location.reload();
       }
     } catch (error) {
-      console.error(error);
-      alert('탈퇴 처리 중 오류가 발생했습니다.\n(작성하신 게시물이나 댓글이 남아있어 탈퇴가 제한될 수 있습니다.)');
+      console.error("탈퇴 처리 중 에러 발생:", error); 
+      alert('탈퇴 처리 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <div style={{ display: 'block', width: '100%', padding: '50px 15px' }}>
       <div style={{ display: 'block', margin: '0 auto', width: '100%', maxWidth: '600px', backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '30px', border: 'none' }}>정보 수정</h2>
+        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>정보 수정</h2>
         
-        {/* 프로필 이미지 */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#f8f9fa', border: '1px solid #ddd', margin: '0 auto 10px', overflow: 'hidden', cursor: 'pointer' }} onClick={() => fileInputRef.current.click()}>
-            {profileImageUrl ? (
-              <img src={profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <span style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#999' }}>사진 변경</span>
-            )}
+            {profileImageUrl ? <img src={profileImageUrl} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#999' }}>사진 변경</span>}
           </div>
-          <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePicUpload} style={{ display: 'none' }} />
+          <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePicSelect} style={{ display: 'none' }} />
         </div>
 
-        <label style={{ display: 'block', marginBottom: '5px' }}>이름</label>
+        <label>이름</label>
         <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-
-        <label style={{ display: 'block', marginBottom: '5px' }}>닉네임</label>
+        <label>닉네임</label>
         <input type="text" value={formData.nickname} onChange={(e) => setFormData({...formData, nickname: e.target.value})} />
-        
-        <label style={{ display: 'block', marginBottom: '5px' }}>생년월일 (YYYY-MM-DD)</label>
-        <input type="text" placeholder="예: 2002-10-28" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} />
+        <label>생년월일 (YYYY-MM-DD)</label>
+        <input type="text" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} />
 
-        {/* 비밀번호 변경 영역 */}
-        <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
-          <h4 style={{ margin: '0 0 15px 0', color: '#495057' }}>비밀번호 변경 (변경 시에만 입력)</h4>
-          
-          <label style={{ display: 'block', marginBottom: '5px' }}>기존 비밀번호</label>
-          <input type="password" value={pwData.password} onChange={(e) => setPwData({...pwData, password: e.target.value})} />
-          
-          <label style={{ display: 'block', marginBottom: '5px' }}>새 비밀번호</label>
-          <input type="password" value={pwData.newPassword} onChange={(e) => setPwData({...pwData, newPassword: e.target.value})} />
-          
-          <label style={{ display: 'block', marginBottom: '5px' }}>새 비밀번호 확인</label>
-          <input type="password" value={pwData.newPasswordConfirm} onChange={(e) => setPwData({...pwData, newPasswordConfirm: e.target.value})} />
+        <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+          <h4 style={{ margin: '0 0 15px 0' }}>비밀번호 변경</h4>
+          <input type="password" placeholder="기존 비밀번호" onChange={(e) => setPwData({...pwData, password: e.target.value})} />
+          <input type="password" placeholder="새 비밀번호" onChange={(e) => setPwData({...pwData, newPassword: e.target.value})} />
+          <input type="password" placeholder="새 비밀번호 확인" onChange={(e) => setPwData({...pwData, newPasswordConfirm: e.target.value})} />
         </div>
 
         <button onClick={handleSave} className="primary-btn" style={{ marginTop: '20px' }}>적용</button>
 
-        {/* 회원 탈퇴 */}
         <div style={{ marginTop: '50px', borderTop: '1px solid #dee2e6', paddingTop: '20px', textAlign: 'center' }}>
           {!showWithdraw ? (
             <button onClick={() => setShowWithdraw(true)} className="danger-btn">회원탈퇴</button>
           ) : (
-            <div style={{ backgroundColor: '#f8d7da', padding: '20px', borderRadius: '8px', border: '1px solid #f5c2c7' }}>
-              <p style={{ color: '#842029', fontWeight: 'bold', marginBottom: '15px' }}>탈퇴를 하면 기존 정보가 사라집니다. 정말 탈퇴하시겠습니까?<br/>확인을 위해 본인의 닉네임을 입력해주세요.</p>
-              <input type="text" placeholder="본인 닉네임 입력" value={withdrawId} onChange={(e) => setWithdrawId(e.target.value)} style={{ marginBottom: '10px' }} />
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button onClick={() => setShowWithdraw(false)} className="action-btn">취소</button>
-                <button onClick={handleWithdraw} disabled={withdrawId !== formData.nickname} className="danger-btn">최종 탈퇴</button>
-              </div>
+            <div style={{ backgroundColor: '#f8d7da', padding: '20px', borderRadius: '8px' }}>
+              <p>본인 닉네임을 입력하여 탈퇴를 확인하세요.</p>
+              <input type="text" value={withdrawId} onChange={(e) => setWithdrawId(e.target.value)} />
+              <button onClick={handleWithdraw} disabled={withdrawId !== formData.nickname} className="danger-btn">최종 탈퇴</button>
+              <button onClick={() => setShowWithdraw(false)} className="action-btn" style={{ marginLeft: '10px' }}>취소</button>
             </div>
           )}
         </div>

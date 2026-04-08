@@ -8,15 +8,17 @@ export default function MyPage({ user }) {
   const [myPosts, setMyPosts] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // 1. 내 최신 정보 불러오기 API 연동
-    api.get('/api/users/my-info')
-      .then((res) => {
-        if (res.data.success) {
-          setMyInfo(res.data.data);
-        }
-      })
-      .catch(console.error);
+  // src/pages/MyPage.jsx 의 useEffect 부분 수정
+useEffect(() => {
+  api.get('/api/users/my-info')
+    .then((res) => {
+      if (res.data.success) {
+        // 🌟 콘솔에서 주소를 직접 확인합니다.
+        console.log("받아온 프로필 주소:", res.data.data.profileImageUrl);
+        setMyInfo(res.data.data);
+      }
+    })
+    .catch(console.error);
 
     // 2. 내가 쓴 글 목록 불러오기 API 연동
     api.get('/api/posts/my-post')

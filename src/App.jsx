@@ -79,7 +79,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           
           <Route path="/mypage" element={user ? <MyPage user={user} /> : <Navigate to="/login" />} />
-          <Route path="/edit-profile" element={user ? <EditProfile user={user} setUser={setUser} /> : <Navigate to="/login" />} />
+          <Route path="/edit-profile" element={user ? <EditProfile /> : <Navigate to="/login" />} />
           
           {/* 🌟 PostWrite, PostEdit에서 불필요한 user props 제거 */}
           <Route path="/write" element={user ? <PostWrite /> : <Navigate to="/login" />} />
