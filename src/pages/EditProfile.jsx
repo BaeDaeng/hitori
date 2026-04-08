@@ -5,8 +5,8 @@ import api from '../api';
 export default function EditProfile() {
   const [formData, setFormData] = useState({ name: '', nickname: '', age: '' });
   const [pwData, setPwData] = useState({ password: '', newPassword: '', newPasswordConfirm: '' });
-  const [profileImageUrl, setProfileImageUrl] = useState(null); // 화면 표시용
-  const [selectedFile, setSelectedFile] = useState(null); // 서버 전송용 파일
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawId, setWithdrawId] = useState('');
@@ -19,19 +19,24 @@ export default function EditProfile() {
       .then((res) => {
         if (res.data.success) {
           const d = res.data.data;
-          setFormData({ name: d.name || '', nickname: d.nickname || '', age: d.age || '' });
+          const formattedAge = d.age ? d.age.split('T')[0] : '';
+          
+          setFormData({ 
+            name: d.name || '', 
+            nickname: d.nickname || '', 
+            age: formattedAge 
+          });
           setProfileImageUrl(d.profileImageUrl || null);
         }
       })
       .catch(console.error);
   }, []);
 
-  // 사진을 선택했을 때 S3에 바로 올리지 않고, 파일 객체만 보관합니다.
   const handlePicSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setSelectedFile(file);
-    setProfileImageUrl(URL.createObjectURL(file)); // 미리보기 업데이트
+    setProfileImageUrl(URL.createObjectURL(file)); 
   };
 
   const handleSave = async () => {
@@ -40,26 +45,23 @@ export default function EditProfile() {
     }
 
     try {
-      // 🌟 JSON 대신 FormData 보따리를 생성하여 백엔드 명세와 맞춥니다.
       const payload = new FormData();
       payload.append('name', formData.name.trim());
       payload.append('nickname', formData.nickname.trim());
       
       if (formData.age) {
-        // Swagger date 형식에 맞춰 YYYY-MM-DD만 추출
-        payload.append('age', formData.age.split('T')[0]);
+        payload.append('age', formData.age);
       }
 
-      // 🌟 사진을 새로 선택했다면 'profileImage'라는 이름으로 파일 원본을 담습니다.
       if (selectedFile) {
         payload.append('profileImage', selectedFile);
       }
 
-      // 🌟 headers를 명시하지 않아도 axios가 FormData를 감지하여 자동으로 처리합니다.
-      const infoRes = await api.put('/api/users/update-info', payload);
+      // 🌟 [수정됨] headers 없이 payload만 보냅니다.
+      const infoRes = await api.post('/api/users/update-info', payload);
 
       if (infoRes.data.success) {
-        // 비밀번호 수정 (입력된 경우만)
+        // 비밀번호가 입력되었을 때만 비밀번호 변경 API 호출
         if (pwData.newPassword) {
           if (pwData.newPassword !== pwData.newPasswordConfirm) return alert('새 비밀번호 불일치');
           await api.put('/api/users/update-pw', {
@@ -104,21 +106,24 @@ export default function EditProfile() {
           <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePicSelect} style={{ display: 'none' }} />
         </div>
 
-        <label>이름</label>
-        <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-        <label>닉네임</label>
-        <input type="text" value={formData.nickname} onChange={(e) => setFormData({...formData, nickname: e.target.value})} />
-        <label>생년월일 (YYYY-MM-DD)</label>
-        <input type="text" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} />
+        <label style={{ display: 'block', marginTop: '10px' }}>이름</label>
+        <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px' }} />
+        
+        <label style={{ display: 'block', marginTop: '10px' }}>닉네임</label>
+        <input type="text" value={formData.nickname} onChange={(e) => setFormData({...formData, nickname: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px' }}/>
+        
+        <label style={{ display: 'block', marginTop: '10px' }}>생년월일</label>
+        {/* 🌟 [수정됨] 달력 UI 강제 적용 */}
+        <input type="date" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px', fontFamily: 'inherit' }} />
 
         <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
           <h4 style={{ margin: '0 0 15px 0' }}>비밀번호 변경</h4>
-          <input type="password" placeholder="기존 비밀번호" onChange={(e) => setPwData({...pwData, password: e.target.value})} />
-          <input type="password" placeholder="새 비밀번호" onChange={(e) => setPwData({...pwData, newPassword: e.target.value})} />
-          <input type="password" placeholder="새 비밀번호 확인" onChange={(e) => setPwData({...pwData, newPasswordConfirm: e.target.value})} />
+          <input type="password" placeholder="기존 비밀번호" onChange={(e) => setPwData({...pwData, password: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px' }} />
+          <input type="password" placeholder="새 비밀번호" onChange={(e) => setPwData({...pwData, newPassword: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px' }} />
+          <input type="password" placeholder="새 비밀번호 확인" onChange={(e) => setPwData({...pwData, newPasswordConfirm: e.target.value})} style={{ width: '100%', padding: '10px' }} />
         </div>
 
-        <button onClick={handleSave} className="primary-btn" style={{ marginTop: '20px' }}>적용</button>
+        <button onClick={handleSave} className="primary-btn" style={{ width: '100%', marginTop: '20px', padding: '12px' }}>적용</button>
 
         <div style={{ marginTop: '50px', borderTop: '1px solid #dee2e6', paddingTop: '20px', textAlign: 'center' }}>
           {!showWithdraw ? (
@@ -126,9 +131,11 @@ export default function EditProfile() {
           ) : (
             <div style={{ backgroundColor: '#f8d7da', padding: '20px', borderRadius: '8px' }}>
               <p>본인 닉네임을 입력하여 탈퇴를 확인하세요.</p>
-              <input type="text" value={withdrawId} onChange={(e) => setWithdrawId(e.target.value)} />
-              <button onClick={handleWithdraw} disabled={withdrawId !== formData.nickname} className="danger-btn">최종 탈퇴</button>
-              <button onClick={() => setShowWithdraw(false)} className="action-btn" style={{ marginLeft: '10px' }}>취소</button>
+              <input type="text" value={withdrawId} onChange={(e) => setWithdrawId(e.target.value)} style={{ padding: '8px', marginBottom: '10px', width: '80%' }} />
+              <div>
+                <button onClick={handleWithdraw} disabled={withdrawId !== formData.nickname} className="danger-btn">최종 탈퇴</button>
+                <button onClick={() => setShowWithdraw(false)} className="action-btn" style={{ marginLeft: '10px' }}>취소</button>
+              </div>
             </div>
           )}
         </div>

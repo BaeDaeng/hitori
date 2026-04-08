@@ -23,6 +23,7 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.pwConfirm) return alert('비밀번호가 일치하지 않습니다.');
+    if (!formData.age) return alert('생년월일을 입력해주세요.');
 
     try {
       const payload = new FormData();
@@ -30,7 +31,7 @@ export default function Signup() {
       payload.append('password', formData.password);
       payload.append('name', formData.name);
       payload.append('nickname', formData.nickname);
-      payload.append('age', formData.age);
+      payload.append('age', formData.age); // type="date"라 YYYY-MM-DD로 정확히 들어감
       payload.append('gender', formData.gender);
       payload.append('phone', formData.phone);
       
@@ -38,14 +39,12 @@ export default function Signup() {
         payload.append('profileImage', selectedFile);
       }
 
-      const res = await api.post('/api/users/sign-up', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // 🌟 [수정됨] headers 수동 설정을 완전히 지웠습니다. Axios가 자동으로 처리합니다.
+      const res = await api.post('/api/users/sign-up', payload);
 
-      // 🌟 회원가입 성공 시 처리
       if (res.data.success) {
         alert('회원가입이 완료되었습니다! 로그인해 주세요.');
-        navigate('/login'); // 👈 로그인 창으로 이동
+        navigate('/login'); 
       }
     } catch (error) {
       console.error("가입 에러:", error);
@@ -59,7 +58,6 @@ export default function Signup() {
        <div className="center-form-box" style={{ maxWidth: '600px', margin: '50px auto', padding: '40px', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #dee2e6' }}>
          <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>회원가입</h2>
          <form onSubmit={handleSignup}>
-           {/* 프로필 사진 등록 */}
            <div style={{ textAlign: 'center', marginBottom: '25px' }}>
              <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#f8f9fa', border: '1px solid #ddd', margin: '0 auto 10px', overflow: 'hidden', cursor: 'pointer' }} onClick={() => fileInputRef.current.click()}>
                {previewPic ? <img src={previewPic} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#999' }}>사진 등록</span>}
@@ -72,7 +70,9 @@ export default function Signup() {
            <input type="password" name="pwConfirm" placeholder="비밀번호 확인" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px' }} />
            <input type="text" name="name" placeholder="이름" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px' }} />
            <input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px' }} />
-           <input type="text" name="age" placeholder="생년월일 (YYYY-MM-DD)" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px' }} />
+           
+           {/* 🌟 [수정됨] 생년월일 입력을 캘린더 형식(type="date")으로 변경하여 서버 양식 강제 맞춤 */}
+           <input type="date" name="age" onChange={handleChange} required style={{ width: '100%', marginBottom: '15px', padding: '10px', fontFamily: 'inherit' }} />
            
            <select name="gender" onChange={handleChange} style={{ width: '100%', marginBottom: '15px', padding: '10px' }}>
              <option value="MAN">남성</option>
