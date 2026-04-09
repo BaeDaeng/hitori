@@ -133,7 +133,7 @@ export default function SearchResults() {
                   <div style={{ marginBottom: '5px' }}>
                     작성자: <span onClick={() => setPopupUserId(post.writer)} style={{ fontWeight: 'bold', color: '#0d6efd', cursor: 'pointer' }}>{post.writer}</span>
                   </div>
-                  <div>조회수: {views} | 좋아요: {post.likeCount || 0} | 댓글: {post.comments ? post.comments.length : 0}</div>
+                  <div>조회수: {views} | 좋아요: {post.likeCount || 0}</div>
                 </div>
               </div>
             );

@@ -86,7 +86,7 @@ useEffect(() => {
                   <div className="post-item-bottom">
                     <div>작성자: {post.writer}</div>
                     {/* 실제 서버 데이터의 좋아요 수와 댓글 수 연동 */}
-                    <div>조회수: {views} | 좋아요 수: {post.likeCount || 0} | 댓글 수: {post.comments ? post.comments.length : 0}</div>
+                    <div>조회수: {views} | 좋아요 수: {post.likeCount || 0}</div>
                   </div>
                 </div>
               );
