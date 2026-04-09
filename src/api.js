@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // 실제 백엔드 서버 주소로 변경
-  baseURL: 'https://gaesipan.shop', 
+  baseURL: 'https://api.gaesipan.shop', 
   timeout: 5000,
 });
 
