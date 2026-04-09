@@ -17,53 +17,73 @@ export default function SearchResults() {
   useEffect(() => {
     if (!query.trim()) return;
 
-    api.get('/api/posts/all-post')
-      .then(async (res) => {
-        if (res.data.success) {
-          const allPosts = res.data.data;
-
-          // 1. 게시물 검색 (부분 일치)
+    const fetchSearchResults = async () => {
+      try {
+        // 1. 게시물 데이터 불러오기 및 검색
+        const postRes = await api.get('/api/posts/all-post');
+        let allPosts = [];
+        
+        if (postRes.data.success) {
+          allPosts = postRes.data.data;
+          
+          // 게시물 필터링 (부분 일치)
           const filteredPosts = allPosts.filter(post => 
             post.title.toLowerCase().includes(query.toLowerCase()) ||
             post.postContent.toLowerCase().includes(query.toLowerCase())
           );
           setPostResults(filteredPosts);
+        }
 
-          //  2. 사용자 검색 우회 로직 (부분 일치 & 본인 포함)
-          // 2-1. 모든 게시글에서 작성자 닉네임만 추출 후 중복 제거
-          const uniqueWriters = [...new Set(allPosts.map(post => post.writer))];
+        // 2. 사용자 검색 (기존 부분 일치 + API 정확도 일치 융합)
+        
+        // 2-1. 기존 방식: 모든 게시글에서 작성자 닉네임 추출
+        const uniqueWriters = [...new Set(allPosts.map(post => post.writer))];
 
-          // 2-2. 검색어가 닉네임에 일부분이라도 포함된 사람만 필터링
-          const matchedWriters = uniqueWriters.filter(writer => 
-            writer.toLowerCase().includes(query.toLowerCase())
-          );
+        // 2-2. 검색어가 닉네임에 일부분이라도 포함된 사람 필터링 (부분 검색 유지)
+        const matchedWriters = uniqueWriters.filter(writer => 
+          writer.toLowerCase().includes(query.toLowerCase())
+        );
 
-          // 2-3. 필터링된 유저들의 상세 프로필을 각각 요청
-          const userPromises = matchedWriters.map(writer => 
-            api.get(`/api/users/user-info/${writer}`)
-              .then(response => {
-                if (response.data.success) return response.data.data;
-                return null;
-              })
-              .catch((error) => {
-                console.error(`프로필 조회 실패 (${writer}):`, error);
-                // 백엔드가 본인 조회를 막아서 에러가 나더라도 화면에 표시 (profileImageUrl로 수정)
+        // 2-3. 핵심 추가 로직: 게시글을 한 번도 안 쓴 사람을 찾기 위해 '정확한 검색어'를 탐색 명단에 억지로 추가
+        // (이미 부분 검색으로 들어간 사람은 제외)
+        const exactMatchExists = matchedWriters.some(w => w.toLowerCase() === query.toLowerCase());
+        if (!exactMatchExists) {
+          matchedWriters.push(query);
+        }
+
+        // 2-4. 수집된 닉네임들(부분일치 + 정확한검색어)의 프로필을 API로 일괄 요청
+        const userPromises = matchedWriters.map(writer => 
+          api.get(`/api/users/user-info/${writer}`)
+            .then(response => {
+              if (response.data.success) return response.data.data;
+              return null;
+            })
+            .catch(() => {
+              // [에러 처리 분기]
+              // 1. 게시글을 쓴 적이 확실한 유저라면? (본인 조회 차단 에러일 수 있으므로 강제 표시)
+              if (uniqueWriters.includes(writer)) {
                 return { 
                   userId: writer, 
                   nickname: writer, 
                   name: '회원', 
-                  profileImageUrl: null // 변수명 수정 완료!
+                  profileImageUrl: null 
                 };
-              })
-          );
+              }
+              // 2. 게시글을 쓴 적도 없고, 검색어로만 찔러본 경우라면? (진짜로 회원가입 안 한 사람임)
+              return null; 
+            })
+        );
 
-          // 모든 유저 정보 요청이 끝날 때까지 기다린 후 상태 업데이트
-          const usersData = await Promise.all(userPromises);
-          setUserResults(usersData.filter(user => user !== null));
-        }
-      })
-      .catch((error) => console.error('검색 중 오류 발생:', error));
+        // 모든 유저 정보 요청이 끝날 때까지 기다린 후 null(없는 유저)을 필터링하고 세팅
+        const usersData = await Promise.all(userPromises);
+        setUserResults(usersData.filter(user => user !== null));
 
+      } catch (error) {
+        console.error('검색 중 오류 발생:', error);
+      }
+    };
+
+    fetchSearchResults();
   }, [query]);
 
   const handleSearch = (e) => {
